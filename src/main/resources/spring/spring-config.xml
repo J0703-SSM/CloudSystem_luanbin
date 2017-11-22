@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+    <!-- 注入hibernate注解对象  -->
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator"/>
+    </bean>
+    <!-- 配置注解模型 -->
+    <mvc:annotation-driven validator="validator"/>
+
+    <!-- 注解扫描的根路径 -->
+    <context:component-scan base-package="com.baidu"/>
+
+    <!-- 将静态资源的处理经由Spring MVC框架交回web应用服务器处理 -->
+    <mvc:default-servlet-handler/>
+
+    <mvc:resources mapping="resources/images/**" location="/resources/images"/>
+    <mvc:resources mapping="resources/js/**" location="/resources/js"/>
+    <mvc:resources mapping="resources/styles/**" location="/resources/styles"/>
+    <!-- 定义静态资源的映射路径 -->
+    <!--<mvc:resources mapping="js/**" location="/js/"/>-->
+    <!-- 配置Spring MVC视图解析 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <!-- 视图路径的前缀 -->
+        <property name="prefix" value="/WEB-INF/pages/"/>
+
+        <!-- 视图路径的后缀-->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>

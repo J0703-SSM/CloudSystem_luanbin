@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.baidu.account.dao.AccountDao">
+
+    <resultMap id="serviceMap" type="com.baidu.base.domain.Services">
+        <id column="service_id" property="service_id"/>
+        <result column="account_id" property="account_id"/>
+        <result column="unix_host" property="unix_host"/>
+        <result column="os_username" property="os_username"/>
+        <result column="login_passwd" property="login_passwd"/>
+        <result column="status" property="status"/>
+        <result column="create_date" property="create_date"/>
+        <result column="pause_date" property="pause_date"/>
+        <result column="close_date" property="close_date"/>
+        <result column="cost_id" property="cost_id"/>
+    </resultMap>
+
+    <resultMap id="service_accountMap" type="com.baidu.base.domain.Services" extends="serviceMap">
+        <association property="account" javaType="com.baidu.base.domain.Account">
+            <id column="account_id" property="account_id"/>
+            <result column="real_name" property="real_name"/>
+            <result column="idcard_no" property="idcard_no"/>
+        </association>
+        <association property="cost" javaType="com.baidu.base.domain.Cost">
+            <id column="cost_id" property="cost_id"/>
+            <result column="name" property="name"/>
+            <result column="descr" property="descr"/>
+        </association>
+    </resultMap>
+
+    <resultMap id="billMap" type="com.baidu.base.domain.Bill">
+        <id column="bill_id" property="bill_id"/>
+        <result column="account_id" property="account_id"/>
+        <result column="bill_month" property="bill_month"/>
+        <result column="cost" property="cost"/>
+        <result column="payment_mode" property="payment_mode"/>
+        <result column="pay_state" property="pay_state"/>
+        <association property="account" javaType="com.baidu.base.domain.Account">
+            <id column="account_id" property="account_id"/>
+            <result column="real_name" property="real_name"/>
+            <result column="idcard_no" property="idcard_no"/>
+            <result column="login_name" property="login_name"/>
+        </association>
+    </resultMap>
+
+
+    <resultMap id="bill_codeMap" type="com.baidu.base.domain.Bill_Code">
+        <result column="bill_id1" property="bill_id"/>
+        <result column="account_id1" property="account_id"/>
+        <result column="bill_code_month" property="bill_month"/>
+        <association property="account" javaType="com.baidu.base.domain.Account">
+            <id column="account_id" property="account_id"/>
+            <result column="real_name" property="real_name"/>
+            <result column="login_name" property="login_name"/>
+            <result column="idcard_no" property="idcard_no"/>
+            <result column="telephone" property="telephone"/>
+        </association>
+        <association property="bill" javaType="com.baidu.base.domain.Bill">
+            <id column="bill_id" property="bill_id"/>
+            <result column="bill_month" property="bill_month"/>
+        </association>
+    </resultMap>
+
+    <select id="findAccountCount"
+            parameterType="com.baidu.base.domain.Account"
+            resultType="int">
+        SELECT count(*)
+        FROM account
+        <where>
+            1=1
+            <if test="idcard_no != null">
+                AND idcard_no LIKE "%"#{idcard_no}"%"
+            </if>
+            <if test="real_name != null">
+                AND real_name LIKE "%"#{real_name}"%"
+            </if>
+            <if test="login_name != null">
+                AND login_name LIKE "%"#{login_name}"%"
+            </if>
+            <if test="status != -1">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="findAllAccount"
+            parameterType="com.baidu.base.utils.PageBean1"
+            resultType="com.baidu.base.domain.Account">
+        SELECT *
+        FROM account
+        <where>
+            1=1
+            <if test="t.idcard_no != null and t.idcard_no.length()>0">
+                AND idcard_no LIKE "%"#{t.idcard_no}"%"
+            </if>
+            <if test="t.real_name != null and t.real_name.length()>0">
+                AND real_name LIKE "%"#{t.real_name}"%"
+            </if>
+            <if test="t.login_name != null and t.login_name.length()>0">
+                AND login_name LIKE "%"#{t.login_name}"%"
+            </if>
+            <if test="t.status != -1">
+                AND status = #{t.status}
+            </if>
+        </where>
+
+        limit #{pageSize} offset #{startIndex}
+    </select>
+
+
+    <update id="setState"
+            parameterType="com.baidu.base.domain.Account">
+        UPDATE account SET status = #{status},pause_date=#{pause_date}
+        WHERE account_id = #{account_id}
+    </update>
+
+    <delete id="deleteAccount"
+            parameterType="com.baidu.base.domain.Account">
+         UPDATE account SET status=#{status},close_date=#{close_date}
+         WHERE account_id=#{account_id}
+    </delete>
+
+    <select id="findSingle"
+            parameterType="java.lang.String"
+            resultType="int">
+        SELECT account_id
+        FROM account
+        WHERE idcard_no=#{value}
+    </select>
+
+    <insert id="addAccount"
+            parameterType="com.baidu.base.domain.Account">
+         INSERT INTO account (recommender_id,login_name,login_passwd,status,create_date,real_name,idcard_no,birthdate,gender,occupation,telephone,email,mailaddress,zipcode,qq)
+        VALUES (#{recommender_id},#{login_name},#{login_passwd},#{status},#{create_date},#{real_name},#{idcard_no},#{birthdate},#{gender},#{occupation},#{telephone},#{email},#{mailaddress},#{zipcode},#{qq})
+    </insert>
+
+    <select id="findServiceCount"
+            resultType="int">
+        SELECT count(*) FROM service
+    </select>
+    <sql id="serviceSql">
+        service.service_id,
+        service.account_id,
+        service.unix_host,
+        service.os_username,
+        service.login_passwd,
+        service.status,
+        service.create_date,
+        service.pause_date,
+        service.close_date,
+        service.cost_id
+    </sql>
+    <sql id="accountSql">
+        account.account_id,
+        account.real_name,
+        account.idcard_no,
+        account.login_name
+    </sql>
+    <sql id="costSql">
+        cost.cost_id,
+        cost.name,
+        cost.descr
+    </sql>
+    <sql id="billSql">
+        bill.*
+    </sql>
+    <sql id="accountsql">
+        account.*
+    </sql>
+    <sql id="bill_codeSql">
+        bill_code.bill_id bill_id1,
+        bill_code.account_id account_id1,
+        bill_code.bill_month bill_code_month
+    </sql>
+    <select id="findAllService"
+            parameterType="com.baidu.base.utils.PageBean1"
+            resultMap="service_accountMap">
+        SELECT
+        <include refid="serviceSql"/>,
+        <include refid="accountSql"/>,
+        <include refid="costSql"/>
+        FROM service ,account, cost
+        WHERE service.account_id = account.account_id
+        AND service.cost_id = cost.cost_id
+        limit #{pageSize} offset #{startIndex}
+    </select>
+
+    <select id="findAllBill"
+            parameterType="com.baidu.base.utils.PageBean1"
+            resultMap="billMap">
+        SELECT
+        <include refid="billSql"/>,
+        <include refid="accountSql"/>
+        FROM bill,account
+        WHERE bill.account_id=account.account_id
+        limit #{pageSize} offset #{startIndex}
+    </select>
+
+    <select id="findBillCount"
+            resultType="int">
+        SELECT count(*) FROM bill
+    </select>
+
+    <select id="findAccountById"
+            parameterType="int"
+            resultType="com.baidu.base.domain.Account">
+        SELECT * FROM account WHERE account_id = #{value}
+    </select>
+
+    <select id="findBill_CodeCount"
+            resultType="int">
+        SELECT count(*) FROM bill_code
+    </select>
+    <select id="findAllBill_Code"
+            parameterType="com.baidu.base.utils.PageBean1"
+            resultMap="bill_codeMap">
+        SELECT
+        <include refid="bill_codeSql"/>,
+        <include refid="billSql"/>,
+        <include refid="accountsql"/>
+        FROM bill,bill_code,account
+        WHERE bill.bill_id=bill_code.bill_id
+        AND bill_code.account_id=account.account_id
+        limit #{pageSize} offset #{startIndex}
+    </select>
+
+    <delete id="deleteAcc_Ser"
+            parameterType="com.baidu.base.domain.Account">
+        DELETE FROM service WHERE account_id = #{account_id}
+    </delete>
+</mapper>

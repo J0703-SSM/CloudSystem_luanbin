@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.baidu.admin.dao.AdminDao">
+    <select id="login" parameterType="com.baidu.base.domain.Admin_info" resultType="com.baidu.base.domain.Admin_info">
+        SELECT * FROM admin_info WHERE admin_code=#{admin_code} AND password=#{password}
+    </select>
+
+    <select id="selectById" parameterType="int" resultType="com.baidu.base.domain.Admin_info">
+        SELECT * FROM admin_info WHERE id=#{value}
+    </select>
+
+    <select id="selectAdminAll" resultType="com.baidu.base.domain.ext.ExtAdmin">
+    SELECT a.id id,a.name name,a.admin_code admin_code,a.telephone telephone,a.email email,a.enrolldate enrolldate,group_concat(r.name SEPARATOR ',') role_names FROM admin_info a LEFT JOIN (admin_role ar,role_info r)
+    ON a.id=ar.admin_id AND ar.role_id=r.role_id GROUP BY a.id
+    </select>
+
+    <select id="selectAdminById" resultType="com.baidu.base.domain.ext.ExtAdmin" parameterType="int">
+    SELECT a.id id,a.name name,a.admin_code admin_code,a.telephone telephone,a.email email,a.enrolldate enrolldate,group_concat(r.name SEPARATOR ',') role_names FROM admin_info a,admin_role ar,role_info r
+      WHERE a.id=ar.admin_id AND ar.role_id=r.role_id and a.id=#{value}
+    </select>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.baidu.base.domain.Admin_info" >
+        update admin_info
+        <set >
+            <if test="admin_code != null" >
+                admin_code = #{admin_code,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null" >
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="telephone != null" >
+                telephone = #{telephone,jdbcType=VARCHAR},
+            </if>
+            <if test="email != null" >
+                email = #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="enrolldate != null" >
+                enrolldate = #{enrolldate,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>
